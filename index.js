@@ -18,43 +18,13 @@
 const http = require('http');
 const PORT = process.env.PORT || 8000;
 const EventEmitter = require('events');
-
+const Router = require('./framework/Router');
 const emitter = new EventEmitter();
+const Application = require('./framework/Application');
 
-class Router {
-    constructor() {
-        this.endpoints = {};
-        
-    }
+const app = new Application();
 
-    request(method = 'GET', path, handler){
-        if(!this.endpoints[path]){
-            this.endpoints[path] = {}
-        }
-        const endpoint = this.endpoints[path];
-        if(endpoint[method]){
-            throw new Error(`[${method} on adress ${path} is not exist ]`)
-        }
-
-        endpoint[method] = handler;
-        emitter.on(`[${path}]:[${method}]`, (req,res)=>{
-            handler(req,res)
-        })
-    }
-    
-    get(path, handler){
-        this.request('GET', path, handler)
-    }
-    post(path, handler){
-        this.request('POST', path, handler)
-    }
-    put(path, handler){
-        this.request('PUT', path, handler)
-    }
-    delete(path, handler){
-        this.request('DELETE', path, handler)
-    }
-}
+app.listen(PORT, ()=>{})
 
 const router = new Router();
 router.get('/', (req,res)=>{
@@ -64,10 +34,5 @@ router.get('/users', (req,res)=>{
     res.end("test send request to /users");
 })
 
-const server = http.createServer((req, res)=>{
-   const emmited = emitter.emit(`[${req.ulr}]:[${req.method}]`, req, res);
-   if(!emmited) res.end();
-}).listen(PORT, ()=>{
-    console.log(`Server listening on port ${PORT}\nurl - http://localhost:${PORT}`);
-})
+
 
